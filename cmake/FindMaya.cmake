@@ -87,26 +87,30 @@ SET(MAYA_VERSION_2012 TRUE)
 ## add one to this list to match your install if none match
 
 IF(APPLE)
-  FIND_PATH(MAYA_BASE_DIR include/maya/MFn.h PATH
-        ${MAYA_LOCATION}
-        $ENV{MAYA_LOCATION}
-        "/Applications/Autodesk/maya2013/Maya.app/Contents"
-        "/Applications/Autodesk/maya2012.17/Maya.app/Contents"
-        "/Applications/Autodesk/maya2012/Maya.app/Contents"
-        "/Applications/Autodesk/maya2011/Maya.app/Contents"
-        "/Applications/Autodesk/maya2010/Maya.app/Contents"
-        )
+  FIND_PATH(MAYA_BASE_DIR include/maya/MFn.h 
+  			PATH
+		        ${MAYA_LOCATION}/devkit
+		        $ENV{MAYA_LOCATION}
+		        "/Applications/Autodesk/maya2013/Maya.app/Contents"
+		        "/Applications/Autodesk/maya2012.17/Maya.app/Contents"
+		        "/Applications/Autodesk/maya2012/Maya.app/Contents"
+		        "/Applications/Autodesk/maya2011/Maya.app/Contents"
+		        "/Applications/Autodesk/maya2010/Maya.app/Contents"
+        	)
+        
   FIND_PATH(MAYA_LIBRARY_DIR libOpenMaya.dylib
-    PATHS
-      ${MAYA_LOCATION}
-      $ENV{MAYA_LOCATION}
-      ${MAYA_BASE_DIR}
-    PATH_SUFFIXES
-      Maya.app/contents/MacOS/
-  DOC "Maya's libraries path"
-)
+    		PATHS
+      			${MAYA_LOCATION}
+      			$ENV{MAYA_LOCATION}
+      			${MAYA_BASE_DIR}
+    		PATH_SUFFIXES
+      			Maya.app/contents/MacOS/
+  			DOC 
+  				"Maya's libraries path"
+		)
 ENDIF(APPLE)
 
+message(STATUS ${MAYA_BASE_DIR})
 IF(UNIX)
   FIND_PATH(MAYA_BASE_DIR include/maya/MFn.h PATH
         ${MAYA_LOCATION}
@@ -210,15 +214,16 @@ FOREACH(MAYA_LIB
 )
   FIND_LIBRARY(MAYA_${MAYA_LIB}_LIBRARY ${MAYA_LIB}
     PATHS
-      ${MAYA_LOCATION}
+       ${MAYA_LOCATION}
       $ENV{MAYA_LOCATION}
       ${MAYA_BASE_DIR}
     PATH_SUFFIXES
+      ../Maya.app/Contents/MacOS/
       MacOS/
       lib/
     DOC "Maya's ${MAYA_LIB} library path"
   )
-
+  
   LIST(APPEND ${MAYA_LIBRARIES} MAYA_${MAYA_LIB}_LIBRARY)
 ENDFOREACH(MAYA_LIB)
 
@@ -228,6 +233,7 @@ FIND_PROGRAM(MAYA_EXECUTABLE maya
     $ENV{MAYA_LOCATION}
     ${MAYA_BASE_DIR}
   PATH_SUFFIXES
+    ../Maya.app/Contents/MacOS/
     MacOS/
     bin/
   DOC "Maya's executable path"

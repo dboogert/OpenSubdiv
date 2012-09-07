@@ -59,6 +59,8 @@ project(OpenSubdiv)
 
 cmake_minimum_required(VERSION 2.8)
 
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+
 set(OpenSubdiv_VERSION_MAJOR 0)
 set(OpenSubdiv_VERSION_MINOR 1)
 set(OpenSubdiv_VERSION_PATCH 0)
@@ -100,7 +102,14 @@ set(CMAKE_SUPPRESS_REGENERATION TRUE)
 find_package(OpenMP)
 find_package(OpenGL)
 find_package(OpenCL)
-find_package(CUDA)
+
+message(STATUS "CUDA ENABLED:${CUDA_ENABLED}")
+if(CUDA_ENABLED)
+	find_package(CUDA)
+else()
+	message(STATUS "CUDA disabled")
+endif()
+
 find_package(GLUT)
 find_package(PTex)
 
@@ -151,17 +160,17 @@ else()
         "please refer to the FindOpenCL.cmake in ${PROJECT_SOURCE_DIR}/cmake.")
 endif()
 
-if(CUDA_FOUND)
-    add_definitions(
-        -DOPENSUBDIV_HAS_CUDA
-    )
-else()
-    message(WARNING
-        "CUDA was not found : support for CUDA parallel compute kernels "
-        "will be disabled in Osd.  If you have the CUDA SDK installed, please "
-        "refer to the FindCUDA.cmake shared module in your cmake installation.")
-endif()
-
+	if(CUDA_FOUND)
+	    add_definitions(
+	        -DOPENSUBDIV_HAS_CUDA
+	    )
+	else()
+	    message(WARNING
+	        "CUDA was not found : support for CUDA parallel compute kernels "
+	        "will be disabled in Osd.  If you have the CUDA SDK installed, please "
+	        "refer to the FindCUDA.cmake shared module in your cmake installation.")
+	endif()
+	
 if(PTEX_FOUND)
     add_definitions(
         -DOPENSUBDIV_HAS_PTEX

@@ -76,27 +76,43 @@ include_directories(
 )
 
 set(SOURCE_FILES
+    #OpenSubdivDrawOverride.cpp
     OpenSubdivShaderOverride.cpp
     hbrUtil.cpp
-    cudaUtil.cpp
+#    cudaUtil.cpp
 )
 
 set(HEADER_FILES
 )
 
 if(UNIX)
-    set(PLATFORM_COMPILE_FLAGS
-        -D_BOOL
-        -DREQUIRE_IOSTREAM
-        -DLINUX
-    )
-    set(PLATFORM_LIBRARIES
-    )
-    set(PLATFORM_PLUGIN_EXTENSION
-        .so
-    )
-    set(PLATFORM_LINK_FLAGS
-    )
+	if (APPLE)
+		set(PLATFORM_COMPILE_FLAGS
+	        -D_BOOL
+	        -DREQUIRE_IOSTREAM
+	    )
+	    set(PLATFORM_LIBRARIES
+	    )
+	    set(PLATFORM_PLUGIN_EXTENSION
+	        .so
+	    )
+	    set(PLATFORM_LINK_FLAGS
+	    )
+	
+	else()
+	    set(PLATFORM_COMPILE_FLAGS
+	        -D_BOOL
+	        -DREQUIRE_IOSTREAM
+	        -DLINUX
+	    )
+	    set(PLATFORM_LIBRARIES
+	    )
+	    set(PLATFORM_PLUGIN_EXTENSION
+	        .so
+	    )
+	    set(PLATFORM_LINK_FLAGS
+	    )
+	endif()
 endif(UNIX)
 
 if(WIN32)

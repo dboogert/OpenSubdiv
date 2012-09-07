@@ -55,7 +55,16 @@
 //     a particular purpose and non-infringement.
 //
 
-#include <GL/glew.h>
+#ifndef __APPLE__
+	#include <GL/glew.h>
+#else
+    #include <OpenGL/gl3.h>
+	#include <GLUT/glut.h>
+#endif
+
+#ifdef __APPLE__
+	#include <maya/OpenMayaMac.h>
+#endif
 
 // Include this first to avoid winsock2.h problems on Windows:
 #include <maya/MTypes.h>
@@ -578,7 +587,9 @@ MStatus initializePlugin( MObject obj )
         return status;
     }
 
+#if not defined(__APPLE__)
     glewInit();
+#endif
 
     //XXX:cleanup  Need to register other kernel dispatchers.
     OpenSubdiv::OsdCpuKernelDispatcher::Register();

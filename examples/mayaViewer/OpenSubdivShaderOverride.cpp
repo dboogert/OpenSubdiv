@@ -54,8 +54,16 @@
 //     exclude the implied warranties of merchantability, fitness for
 //     a particular purpose and non-infringement.
 //
+#ifndef __APPLE__
+	#include <GL/glew.h>
+#else
+    #include <OpenGL/gl3.h>
+	#include <GLUT/glut.h>
+#endif
 
-#include <GL/glew.h>
+#ifdef __APPLE__
+	#include <maya/OpenMayaMac.h>
+#endif
 
 // Include this first to avoid winsock2.h problems on Windows:
 #include <maya/MTypes.h>
@@ -102,8 +110,6 @@ extern void cudaInit();
     printf(__VA_ARGS__); \
     }
 
-#define MAYA2013_PREVIEW
-
 //---------------------------------------------------------------------------
 template<class T> static int
 FindAttribute( MFnDependencyNode &fnDN, const char *nm, T *val )
@@ -138,7 +144,7 @@ public:
     static void *creator();
     static MStatus initialize();
 
-    virtual void postConstructor() 
+    virtual void postConstructor()
         {
             setMPSafe(false);
         }
@@ -157,9 +163,9 @@ public:
             }
             return MS::kSuccess;
         }
-    
+
     virtual bool setInternalValueInContext(const MPlug &plug, const MDataHandle &handle, MDGContext &);
-    
+
     void updateAttributes();
     bool isWireframe() const { return _wireframe; }
     int getLevel() const { return _level; }
@@ -280,7 +286,7 @@ OpenSubdivShader::compute(const MPlug &plug, MDataBlock &data)
 static MColor getColor(MObject object, MObject attr)
 {
     MPlug plug(object, attr);
-    
+
     MObject data;
     plug.getValue(data);
     MFnNumericData numFn(data);
@@ -301,7 +307,7 @@ OpenSubdivShader::updateAttributes()
     MFnDependencyNode depFn(object);
     FindAttribute(depFn, "wireframe", &_wireframe);
     FindAttribute(depFn, "shininess", &shininess);
-    
+
     float color[4] = { 0, 0, 0, 1 };
     diffuse.get(color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
@@ -390,7 +396,7 @@ OsdMeshData::OsdMeshData(MObject mesh) :
 {
 }
 
-OsdMeshData::~OsdMeshData() 
+OsdMeshData::~OsdMeshData()
 {
     if (_hbrmesh) delete _hbrmesh;
     if (_osdmesh) delete _osdmesh;
@@ -551,11 +557,11 @@ OsdMeshData::updateGeometry(const MHWRender::MVertexBuffer *points, const MHWRen
         glBindBuffer(GL_COPY_READ_BUFFER, *(GLuint*)points->resourceHandle());
         glBindBuffer(GL_COPY_WRITE_BUFFER, _positionBuffer->GetGpuBuffer());
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, nCoarsePoints*3*sizeof(float));
-        
+
         glBindBuffer(GL_COPY_READ_BUFFER, *(GLuint*)normals->resourceHandle());
         glBindBuffer(GL_COPY_WRITE_BUFFER, _normalBuffer->GetGpuBuffer());
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, nCoarsePoints*3*sizeof(float));
-        
+
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
         glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
     }
@@ -609,7 +615,7 @@ OsdMeshData::draw() const
 
     glDrawElements(_scheme == OpenSubdivShader::kLoop ? GL_TRIANGLES : GL_QUADS,
                    _elementArrayBuffer->GetNumIndices(), GL_UNSIGNED_INT, 0);
-    
+
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
 
@@ -628,7 +634,7 @@ public:
             return new OpenSubdivShaderOverride(obj);
         }
     virtual ~OpenSubdivShaderOverride();
-    
+
     virtual MString initialize(const MInitContext &initContext, MInitFeedback &initFeedback)
         {
             MString empty;
@@ -668,7 +674,7 @@ public:
 
     virtual void updateDG(MObject object)
         {
-            if (object == MObject::kNullObj) 
+            if (object == MObject::kNullObj)
                 return;
 
             _shader = (OpenSubdivShader*)MPxHwShaderNode::getHwShaderNodePtr(object);
@@ -701,7 +707,7 @@ public:
             return false;
         }
 
-    virtual MHWRender::DrawAPI supportedDrawAPIs() const 
+    virtual MHWRender::DrawAPI supportedDrawAPIs() const
         {
             return MHWRender::kOpenGL;
         }
@@ -709,7 +715,7 @@ public:
         {
             return true;
         }
-    
+
 
 private:
     OpenSubdivShaderOverride(const MObject &obj);
@@ -746,8 +752,8 @@ OpenSubdivShaderOverride::draw(MHWRender::MDrawContext &context, const MHWRender
         if (!blendState) {
             MBlendStateDesc desc;
 
-            for(int i = 0; i < (desc.independentBlendEnable ? MHWRender::MBlendState::kMaxTargets : 1); ++i) 
-            {    
+            for(int i = 0; i < (desc.independentBlendEnable ? MHWRender::MBlendState::kMaxTargets : 1); ++i)
+            {
                 desc.targetBlends[i].blendEnable = false;
             }
             blendState = stateMgr->acquireBlendState(desc);
@@ -763,7 +769,7 @@ OpenSubdivShaderOverride::draw(MHWRender::MDrawContext &context, const MHWRender
         if (data == NULL) {
             return false;
         }
-        
+
         data->populateIfNeeded(_shader->getLevel(), _shader->getScheme(), _shader->getKernel());
 
         const MHWRender::MVertexBuffer *position = NULL, *normal = NULL;
@@ -845,10 +851,10 @@ public:
 #ifdef MAYA2013_PREVIEW
     virtual void createVertexStream(const MDagPath &dagPath, MVertexBuffer &vertexBuffer,
                                     const MComponentDataIndexing &targetIndexing, const MComponentDataIndexing &,
-                                    const MVertexBufferArray &) const 
+                                    const MVertexBufferArray &) const
 #else
     virtual void createVertexStream(const MDagPath &dagPath, MVertexBuffer &vertexBuffer,
-                                    const MComponentDataIndexing &targetIndexing) const 
+                                    const MComponentDataIndexing &targetIndexing) const
 #endif
         {
             const MVertexBufferDescriptor &desc = vertexBuffer.descriptor();
@@ -858,7 +864,7 @@ public:
             if (!_normal) {
                 MFloatPointArray points;
                 meshFn.getPoints(points);
-                
+
 #ifdef MAYA2013_PREVIEW
                 float *buffer = (float*)vertexBuffer.acquire(nVertices, true);
 #else
@@ -910,20 +916,24 @@ initializePlugin( MObject obj )
 {
     MStatus status;
     MFnPlugin plugin( obj, "Pixar", "3.0", "Any" );// vender,version,apiversion
-    
+
     MString swatchName = MHWShaderSwatchGenerator::initialize();
     MString userClassify("shader/surface/utility/:drawdb/shader/surface/OpenSubdivShader:swatch/"+swatchName);
 
+#if not defined(__APPLE__)
     glewInit();
+#endif
+
     OpenSubdiv::OsdCpuKernelDispatcher::Register();
+#ifdef USE_GPU
     OpenSubdiv::OsdCudaKernelDispatcher::Register();
     OpenSubdiv::OsdClKernelDispatcher::Register();
     cudaInit();
-
+#endif
     // shader node
     status = plugin.registerNode( "openSubdivShader",
-                                  OpenSubdivShader::id, 
-                                  &OpenSubdivShader::creator, 
+                                  OpenSubdivShader::id,
+                                  &OpenSubdivShader::creator,
                                   &OpenSubdivShader::initialize,
                                   MPxNode::kHwShaderNode,
                                   &userClassify);
@@ -946,7 +956,7 @@ MStatus
 uninitializePlugin( MObject obj )
 {
     MFnPlugin plugin( obj );
-  
+
     MStatus status;
     status = plugin.deregisterNode(OpenSubdivShader::id);
 
