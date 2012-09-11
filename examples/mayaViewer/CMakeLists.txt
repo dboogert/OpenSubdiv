@@ -75,12 +75,23 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
 )
 
-set(SOURCE_FILES
-    #OpenSubdivDrawOverride.cpp
+set(SHADER_SOURCE_FILES
     OpenSubdivShaderOverride.cpp
     hbrUtil.cpp
 #    cudaUtil.cpp
 )
+
+set(DRAW_SOURCE_FILES
+	OpenSubdivDrawOverride.cpp
+    hbrUtil.cpp
+#    cudaUtil.cpp
+)
+
+set(SHAPE_SOURCE_FILES
+	OpenSubdivShapeNode.cpp
+    hbrUtil.cpp
+#    cudaUtil.cpp
+)	
 
 set(HEADER_FILES
 )
@@ -94,7 +105,7 @@ if(UNIX)
 	    set(PLATFORM_LIBRARIES
 	    )
 	    set(PLATFORM_PLUGIN_EXTENSION
-	        .so
+	        .bundle
 	    )
 	    set(PLATFORM_LINK_FLAGS
 	    )
@@ -135,19 +146,65 @@ add_definitions(
     ${PLATFORM_COMPILE_FLAGS}
 )
 
-add_library(maya_plugin SHARED
-    ${SOURCE_FILES}
+add_library(shader_maya_plugin SHARED
+    ${SHADER_SOURCE_FILES}
     ${HEADER_FILES}
 )
 
-set_target_properties(maya_plugin
+add_library(draw_maya_plugin SHARED
+    ${DRAW_SOURCE_FILES}
+    ${HEADER_FILES}
+)
+
+add_library(shape_maya_plugin SHARED
+    ${SHAPE_SOURCE_FILES}
+    ${HEADER_FILES}
+)
+
+set_target_properties(shader_maya_plugin
     PROPERTIES
-    OUTPUT_NAME "mayaViewer"
+    OUTPUT_NAME "mayaShaderViewer"
     SUFFIX ${PLATFORM_PLUGIN_EXTENSION}
     LINK_FLAGS "${PLATFORM_LINK_FLAGS}"
 )
 
-target_link_libraries(maya_plugin
+set_target_properties(draw_maya_plugin
+    PROPERTIES
+    OUTPUT_NAME "mayaDrawViewer"
+    SUFFIX ${PLATFORM_PLUGIN_EXTENSION}
+    LINK_FLAGS "${PLATFORM_LINK_FLAGS}"
+)
+
+set_target_properties(shape_maya_plugin
+    PROPERTIES
+    OUTPUT_NAME "mayaShapeNode"
+    SUFFIX ${PLATFORM_PLUGIN_EXTENSION}
+    LINK_FLAGS "${PLATFORM_LINK_FLAGS}"
+)
+
+target_link_libraries(shader_maya_plugin
+    ${OSD_LINK_TARGET}
+    ${MAYA_Foundation_LIBRARY}
+    ${MAYA_OpenMaya_LIBRARY}
+    ${MAYA_OpenMayaRender_LIBRARY}
+    ${MAYA_OpenMayaUI_LIBRARY}
+    ${MAYA_tbb_LIBRARY}
+    ${PLATFORM_LIBRARIES}
+    ${GLEW_LIBRARY}
+)
+
+target_link_libraries(draw_maya_plugin
+    ${OSD_LINK_TARGET}
+    ${MAYA_Foundation_LIBRARY}
+    ${MAYA_OpenMaya_LIBRARY}
+    ${MAYA_OpenMayaRender_LIBRARY}
+    ${MAYA_OpenMayaUI_LIBRARY}
+    ${MAYA_tbb_LIBRARY}
+    ${PLATFORM_LIBRARIES}
+    ${GLEW_LIBRARY}
+)
+
+target_link_libraries(shape_maya_plugin
     ${OSD_LINK_TARGET}
     ${MAYA_Foundation_LIBRARY}
     ${MAYA_OpenMaya_LIBRARY}
