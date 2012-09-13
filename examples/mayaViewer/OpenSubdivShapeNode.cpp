@@ -228,6 +228,7 @@ MStatus OpenSubdivShape::compute( const MPlug& plug, MDataBlock& dataBlock )
 		delete hbrMesh;
 		delete osdMesh;
 		delete posNormalBuffer;
+		delete indexBuffer;
 	}
 
 	return status;
