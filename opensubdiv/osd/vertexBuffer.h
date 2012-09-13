@@ -120,6 +120,11 @@ public:
         return _cpuVbo;
     }
 
+    int GetSize() const
+    {
+    	return _vboSize;
+    }
+
     virtual GLuint GetGpuBuffer();
 
 protected:
